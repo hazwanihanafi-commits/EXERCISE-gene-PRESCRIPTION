@@ -4,11 +4,12 @@ import json, os, io
 from fpdf import FPDF
 from datetime import datetime
 
-# === Path setup ===
+# === Configuration ===
 BASE_DIR = os.path.dirname(__file__)
 RULES_PATH = os.path.join(BASE_DIR, "rules.json")
 ASSESS_PATH = os.path.join(BASE_DIR, "assessments.json")
 
+# ✅ Only one Flask app instance
 app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)
 
@@ -104,6 +105,11 @@ def generate_plan_from_input(data, rules):
         "generated_at": datetime.utcnow().isoformat() + "Z"
     }
 
+# === Health check (for Render) ===
+@app.route('/health')
+def health():
+    return jsonify(status="ok", message="Render health check passed ✅"), 200
+
 # === API routes ===
 @app.route('/api')
 def api_home():
@@ -135,7 +141,7 @@ def api_get_assessment(participant_id):
     assessments = load_assessments()
     return jsonify(assessments.get(participant_id, {}))
 
-# === Admin and file serving ===
+# === Admin Editor ===
 @app.route("/admin", methods=["GET","POST"])
 def admin():
     key = request.args.get("key","")
@@ -153,15 +159,24 @@ def admin():
         current = f.read()
     return render_template("admin.html", rules_json=current)
 
-# === Front-end serving (React or static HTML) ===
+# === Frontend / Default Route ===
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_frontend(path):
+    # Serve files if they exist in /static
     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, "index.html")
+    # If no static index.html, show default message
+    index_path = os.path.join(app.static_folder, "index.html")
+    if os.path.exists(index_path):
+        return send_from_directory(app.static_folder, "index.html")
+    return """
+    <h2>EXECOGIM Gene-Guided Exercise API</h2>
+    <p>Server Running ✅</p>
+    <p>Try the <a href='/api'>/api</a> endpoint.</p>
+    """
 
-# === Start server ===
+# === Start Server (Render will use gunicorn app:app) ===
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
