@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EXECOGIM Gene-Guided Exercise</title>
+  <title>EXECOGIM | Gene-Guided Exercise Prescription</title>
   <style>
+    /* ====== GENERAL STYLES ====== */
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
       background: #f4f7f9;
@@ -13,25 +14,56 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
       min-height: 100vh;
     }
+
+    /* ====== HEADER ====== */
     header {
-      background: #0078d4;
+      background: linear-gradient(90deg, #660066, #990099, #0078d4);
       color: white;
-      width: 100%;
-      padding: 1rem;
-      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
+
+    header img {
+      height: 60px;
+    }
+
+    header .title {
+      text-align: center;
+      flex-grow: 1;
+    }
+
+    header .title h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    header .title p {
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    /* ====== MAIN ====== */
     main {
       background: white;
-      margin-top: 2rem;
+      margin: 2rem auto;
       padding: 2rem;
-      border-radius: 10px;
+      border-radius: 12px;
       box-shadow: 0 3px 8px rgba(0,0,0,0.1);
       width: 90%;
-      max-width: 600px;
+      max-width: 650px;
+      text-align: center;
     }
+
+    h2 {
+      color: #0078d4;
+    }
+
     input, select, button {
       width: 100%;
       padding: 10px;
@@ -40,14 +72,18 @@
       border: 1px solid #ccc;
       font-size: 1rem;
     }
+
     button {
       background: #0078d4;
       color: white;
       cursor: pointer;
+      transition: background 0.3s ease;
     }
+
     button:hover {
       background: #005fa3;
     }
+
     #result {
       margin-top: 1.5rem;
       padding: 1rem;
@@ -55,22 +91,76 @@
       border-radius: 8px;
       display: none;
     }
+
+    #downloadBtn {
+      margin-top: 10px;
+      background: #16a34a;
+    }
+
+    #downloadBtn:hover {
+      background: #0f8b3d;
+    }
+
+    /* ====== FOOTER ====== */
+    footer {
+      margin-top: auto;
+      background: #f0f0f0;
+      color: #444;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      border-top: 2px solid #ddd;
+    }
+
+    footer p {
+      margin: 4px 0;
+    }
+
+    footer a {
+      color: #0078d4;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        text-align: center;
+      }
+      header img {
+        height: 50px;
+        margin: 0.5rem 0;
+      }
+    }
   </style>
 </head>
+
 <body>
+  <!-- ====== HEADER ====== -->
   <header>
-    <h1>EXECOGIM</h1>
-    <p>Malaysia’s First Gene-Guided Exercise Prescription System</p>
+    <img src="https://upload.wikimedia.org/wikipedia/en/7/7d/Universiti_Sains_Malaysia_logo.svg" alt="USM Logo">
+    <div class="title">
+      <h1>EXECOGIM</h1>
+      <p>Malaysia’s First Gene-Guided Exercise Prescription Platform</p>
+    </div>
+    <img src="https://upload.wikimedia.org/wikipedia/en/8/8b/USM_Health_Campus_Logo.png" alt="IPPT Logo">
   </header>
 
+  <!-- ====== MAIN CONTENT ====== -->
   <main>
     <h2>Personalized Exercise Plan Generator 🧬</h2>
+    <p>Enter your basic info to receive a personalized 12-week exercise recommendation based on your <b>BDNF genotype</b>.</p>
+
     <form id="geneForm">
       <label>BDNF Genotype:</label>
       <select id="genotype" required>
         <option value="Val/Val">Val/Val</option>
-        <option value="Met/Met">Met/Met</option>
         <option value="Val/Met">Val/Met</option>
+        <option value="Met/Met">Met/Met</option>
       </select>
 
       <label>Age:</label>
@@ -86,19 +176,36 @@
       <button type="submit">Generate Plan</button>
     </form>
 
-    <div id="result"></div>
+    <div id="result">
+      <h3>✅ Personalized Plan Generated</h3>
+      <div id="planDetails"></div>
+      <button id="downloadBtn" style="display:none;">📄 Download PDF Plan</button>
+    </div>
   </main>
 
+  <!-- ====== FOOTER ====== -->
+  <footer>
+    <p><b>EXECOGIM</b> — Exercise Cognition Genotype Integration Model</p>
+    <p>Developed by <b>Institut Perubatan & Pergigian Termaju (IPPT)</b>, Universiti Sains Malaysia</p>
+    <p><a href="mailto:info@usm.my">info@usm.my</a> | <a href="/api">API</a> | <a href="/health">System Status</a></p>
+    <p>© 2025 Universiti Sains Malaysia. All rights reserved.</p>
+  </footer>
+
+  <!-- ====== SCRIPT ====== -->
   <script>
     const form = document.getElementById('geneForm');
     const resultDiv = document.getElementById('result');
+    const planDetails = document.getElementById('planDetails');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    let lastData = {}; // store last form input
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       resultDiv.style.display = 'none';
-      resultDiv.innerHTML = 'Generating plan... ⏳';
+      planDetails.innerHTML = 'Generating plan... ⏳';
 
-      const data = {
+      lastData = {
         genotype: document.getElementById('genotype').value,
         age: document.getElementById('age').value,
         fitness_level: document.getElementById('fitness').value
@@ -108,25 +215,45 @@
         const res = await fetch('/api/generate_plan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+          body: JSON.stringify(lastData)
         });
         const plan = await res.json();
 
         resultDiv.style.display = 'block';
-        resultDiv.innerHTML = `
-          <h3>✅ Personalized Plan Generated</h3>
+        planDetails.innerHTML = `
           <p><b>Genotype:</b> ${plan.genotype_label}</p>
           <p><b>Sessions per week:</b> ${plan.summary.sessions_per_week}</p>
           <p><b>Session length:</b> ${plan.summary.session_length_min} min</p>
           <p><b>Intensity:</b> ${plan.summary.intensity}</p>
           <p><b>Generated at:</b> ${new Date(plan.generated_at).toLocaleString()}</p>
         `;
+        downloadBtn.style.display = 'inline-block';
       } catch (err) {
         resultDiv.style.display = 'block';
-        resultDiv.innerHTML = `<p style="color:red;">❌ Failed to generate plan. Check API or network connection.</p>`;
+        planDetails.innerHTML = `<p style="color:red;">❌ Failed to generate plan. Check API or network connection.</p>`;
+        downloadBtn.style.display = 'none';
+      }
+    });
+
+    downloadBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/download_plan_pdf', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(lastData)
+        });
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'EXECOGIM_Exercise_Plan.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (err) {
+        alert('❌ Failed to download PDF.');
       }
     });
   </script>
 </body>
 </html>
-
