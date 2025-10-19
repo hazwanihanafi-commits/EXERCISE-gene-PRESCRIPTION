@@ -1,3 +1,10 @@
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Welcome to EXECOGIM Gene-Guided Exercise API — Server Running ✅"
 from flask import Flask, request, jsonify, send_from_directory, render_template, redirect, url_for
 from flask_cors import CORS
 import json, os, io
