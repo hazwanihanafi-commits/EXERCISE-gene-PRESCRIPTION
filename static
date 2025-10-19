@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EXECOGIM | Gene-Guided Exercise Prescription</title>
   <style>
-    /* ====== GENERAL STYLES ====== */
+    /* ====== GENERAL ====== */
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
       background: #f4f7f9;
@@ -15,37 +15,77 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     /* ====== HEADER ====== */
     header {
+      position: relative;
       background: linear-gradient(90deg, #660066, #990099, #0078d4);
       color: white;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
+      gap: 2rem;
       padding: 1rem 2rem;
+      flex-wrap: wrap;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      overflow: hidden;
     }
 
     header img {
       height: 60px;
+      width: auto;
+      filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.2));
     }
 
     header .title {
       text-align: center;
-      flex-grow: 1;
+      animation: fadeSlideDown 1.5s ease-out forwards;
+      opacity: 0;
     }
 
     header .title h1 {
       margin: 0;
-      font-size: 1.8rem;
+      font-size: 2rem;
+      letter-spacing: 1px;
+      animation: fadeIn 2s ease-in 0.5s forwards;
     }
 
     header .title p {
       margin: 0;
-      font-size: 0.9rem;
-      opacity: 0.9;
+      font-size: 1rem;
+      opacity: 0;
+      animation: fadeIn 2s ease-in 1s forwards;
+    }
+
+    /* ====== DNA ICON ANIMATION ====== */
+    .dna {
+      position: absolute;
+      left: -80px;
+      top: 0;
+      width: 60px;
+      height: 60px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/DNA_double_helix_vertical.png/64px-DNA_double_helix_vertical.png') no-repeat center;
+      background-size: contain;
+      opacity: 0.1;
+      animation: floatDNA 25s linear infinite;
+    }
+
+    @keyframes floatDNA {
+      0% { transform: translateX(-80px) rotate(0deg); opacity: 0.1; }
+      50% { opacity: 0.25; }
+      100% { transform: translateX(110vw) rotate(360deg); opacity: 0.1; }
+    }
+
+    @keyframes fadeSlideDown {
+      0% { transform: translateY(-30px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     /* ====== MAIN ====== */
@@ -112,28 +152,22 @@
       border-top: 2px solid #ddd;
     }
 
-    footer p {
-      margin: 4px 0;
-    }
+    footer p { margin: 4px 0; }
+    footer a { color: #0078d4; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
 
-    footer a {
-      color: #0078d4;
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-
-    /* Responsive */
+    /* ====== RESPONSIVE ====== */
     @media (max-width: 600px) {
       header {
         flex-direction: column;
         text-align: center;
+        gap: 0.5rem;
       }
       header img {
         height: 50px;
-        margin: 0.5rem 0;
+      }
+      header .title h1 {
+        font-size: 1.6rem;
       }
     }
   </style>
@@ -142,12 +176,20 @@
 <body>
   <!-- ====== HEADER ====== -->
   <header>
-    <img src="https://upload.wikimedia.org/wikipedia/en/7/7d/Universiti_Sains_Malaysia_logo.svg" alt="USM Logo">
+    <div class="dna"></div>
+
+    <!-- USM Logo -->
+    <img src="https://upload.wikimedia.org/wikipedia/en/7/7d/Universiti_Sains_Malaysia_logo.svg" 
+         alt="USM Logo">
+
     <div class="title">
       <h1>EXECOGIM</h1>
       <p>Malaysia’s First Gene-Guided Exercise Prescription Platform</p>
     </div>
-    <img src="https://upload.wikimedia.org/wikipedia/en/8/8b/USM_Health_Campus_Logo.png" alt="IPPT Logo">
+
+    <!-- IPPT Logo -->
+    <img src="https://upload.wikimedia.org/wikipedia/en/8/8b/USM_Health_Campus_Logo.png" 
+         alt="IPPT Logo">
   </header>
 
   <!-- ====== MAIN CONTENT ====== -->
@@ -197,8 +239,7 @@
     const resultDiv = document.getElementById('result');
     const planDetails = document.getElementById('planDetails');
     const downloadBtn = document.getElementById('downloadBtn');
-
-    let lastData = {}; // store last form input
+    let lastData = {};
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -218,7 +259,6 @@
           body: JSON.stringify(lastData)
         });
         const plan = await res.json();
-
         resultDiv.style.display = 'block';
         planDetails.innerHTML = `
           <p><b>Genotype:</b> ${plan.genotype_label}</p>
